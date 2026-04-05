@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rus tili — O'rganish</title>
+<meta name="description" content="Rus tilini o'zbek tilida o'rganing. A1+ dan B2 gacha. Kartochkalar, testlar, diktant.">
+<meta name="theme-color" content="#58cc02">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇷🇺</text></svg>">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background: #fafafa; -webkit-font-smoothing: antialiased; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+  textarea:focus, input:focus { outline: none; border-color: #1cb0f6 !important; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+const FONT = `'Helvetica Neue', Helvetica, Arial, sans-serif`;
+const LS = "-0.04em";
+const C = {
+  bg: "#fafafa", card: "#ffffff", border: "#ebebeb",
+  text: "#1a1a1a", sub: "#8a8a8a", muted: "#c4c4c4",
+  green: "#58cc02", greenDark: "#4baa02", blue: "#1cb0f6",
+  orange: "#ff9600", red: "#ff4b4b", purple: "#ce82ff",
+  greenBg: "#e6f9d4", redBg: "#ffe0e0", orangeBg: "#fff3e0",
+};
+
+const LESSONS = [
+  {
+    stage: "A1+", color: C.green,
+    lessons: [
+      {
+        id: "a1-1", title: "Tanishuv", titleRu: "Знакомство", icon: "👋",
+        cards: [
+          { front: "Привет", back: "Salom" }, { front: "Меня зовут...", back: "Mening ismim..." },
+          { front: "Как дела?", back: "Qanday ahvolingiz?" }, { front: "Спасибо", back: "Rahmat" },
+          { front: "Пожалуйста", back: "Iltimos / Marhamat" }, { front: "До свидания", back: "Xayr" },
+        ],
+        quiz: [
+          { q: "\"Salom\" ruscha qanday?", opts: ["Привет", "Пока", "Спасибо", "Да"], ans: 0 },
+          { q: "\"Как дела?\" nima degani?", opts: ["Ismingiz nima?", "Qanday ahvolingiz?", "Qaerdasiz?", "Necha yoshdasiz?"], ans: 1 },
+          { q: "\"Rahmat\" ruscha?", opts: ["Пожалуйста", "Извините", "Спасибо", "Здравствуйте"], ans: 2 },
+          { q: "\"До свидания\" nima?", opts: ["Salom", "Xayr", "Rahmat", "Kechirasiz"], ans: 1 },
+        ],
+        talk: [
+          { text: "Привет!", hint: "Salom!" },
+          { text: "Меня зовут Анна.", hint: "Mening ismim Anna." },
+          { text: "Как дела?", hint: "Qanday ahvolingiz?" },
+          { text: "Хорошо, спасибо!", hint: "Yaxshi, rahmat!" },
+          { text: "До свидания!", hint: "Xayr!" },
+        ]
+      },
+      {
+        id: "a1-2", title: "Raqamlar", titleRu: "Числа", icon: "🔢",
+        cards: [
+          { front: "Один", back: "1 — Bir" }, { front: "Два", back: "2 — Ikki" },
+          { front: "Три", back: "3 — Uch" }, { front: "Пять", back: "5 — Besh" },
+          { front: "Десять", back: "10 — O'n" }, { front: "Сто", back: "100 — Yuz" },
+        ],
+        quiz: [
+          { q: "\"Три\" nechchi?", opts: ["2", "3", "5", "10"], ans: 1 },
+          { q: "\"Besh\" ruscha?", opts: ["Два", "Четыре", "Пять", "Шесть"], ans: 2 },
+          { q: "\"Десять\" nechchi?", opts: ["10", "100", "7", "20"], ans: 0 },
+          { q: "\"Yuz\" ruscha?", opts: ["Десять", "Двадцать", "Пятьдесят", "Сто"], ans: 3 },
+        ],
+        talk: [
+          { text: "Один, два, три.", hint: "Bir, ikki, uch." },
+          { text: "Сколько стоит?", hint: "Qancha turadi?" },
+          { text: "Пять рублей.", hint: "Besh rubl." },
+          { text: "Десять минут.", hint: "O'n daqiqa." },
+        ]
+      },
+      {
+        id: "a1-3", title: "Oila", titleRu: "Семья", icon: "👨‍👩‍👧",
+        cards: [
+          { front: "Мама", back: "Ona" }, { front: "Папа", back: "Ota" },
+          { front: "Брат", back: "Aka / Uka" }, { front: "Сестра", back: "Opa / Singil" },
+          { front: "Муж", back: "Er" }, { front: "Жена", back: "Xotin / Rafiqa" },
+        ],
+        quiz: [
+          { q: "\"Ona\" ruscha?", opts: ["Папа", "Мама", "Сестра", "Брат"], ans: 1 },
+          { q: "\"Брат\" nima?", opts: ["Ota", "Er", "Aka/Uka", "Ona"], ans: 2 },
+          { q: "\"Xotin\" ruscha?", opts: ["Муж", "Жена", "Мама", "Сестра"], ans: 1 },
+          { q: "\"Папа\" kim?", opts: ["Ona", "Ota", "Aka", "Er"], ans: 1 },
+        ],
+        talk: [
+          { text: "Это моя мама.", hint: "Bu mening onam." },
+          { text: "У меня есть брат.", hint: "Mening akam bor." },
+          { text: "Моя сестра студентка.", hint: "Mening opam talaba." },
+          { text: "Мой папа работает.", hint: "Mening otam ishlaydi." },
+        ]
+      },
+    ]
+  },
+  {
+    stage: "A2", color: C.blue,
+    lessons: [
+      {
+        id: "a2-1", title: "Restoranda", titleRu: "В ресторане", icon: "🍽️",
+        cards: [
+          { front: "Меню, пожалуйста", back: "Menyu bering, iltimos" },
+          { front: "Я хочу заказать...", back: "Men buyurtma bermoqchiman..." },
+          { front: "Счёт, пожалуйста", back: "Hisob, iltimos" },
+          { front: "Очень вкусно!", back: "Juda mazali!" },
+          { front: "Что вы рекомендуете?", back: "Nima tavsiya qilasiz?" },
+          { front: "Без сахара", back: "Shakarsiz" },
+        ],
+        quiz: [
+          { q: "Hisob so'rash uchun?", opts: ["Меню, пожалуйста", "Счёт, пожалуйста", "Спасибо", "Очень вкусно"], ans: 1 },
+          { q: "\"Juda mazali\" ruscha?", opts: ["Очень дорого", "Очень вкусно", "Очень большой", "Очень красиво"], ans: 1 },
+          { q: "\"Без сахара\" nima?", opts: ["Shakar bilan", "Shakarsiz", "Sutli", "Issiq"], ans: 1 },
+          { q: "Tavsiya so'rash?", opts: ["Сколько стоит?", "Где туалет?", "Что вы рекомендуете?", "Можно воду?"], ans: 2 },
+        ],
+        talk: [
+          { text: "Здравствуйте!", hint: "Salom!" },
+          { text: "Меню, пожалуйста.", hint: "Menyu bering." },
+          { text: "Я хочу кофе.", hint: "Men kofe xohlayman." },
+          { text: "Без сахара.", hint: "Shakarsiz." },
+          { text: "Счёт, пожалуйста.", hint: "Hisob, iltimos." },
+        ]
+      },
+      {
+        id: "a2-2", title: "Shahar", titleRu: "В городе", icon: "🏙️",
+        cards: [
+          { front: "Где находится...?", back: "...qayerda?" },
+          { front: "Поверните направо", back: "O'ngga buriling" },
+          { front: "Идите прямо", back: "To'g'riga yuring" },
+          { front: "Остановка автобуса", back: "Avtobus bekati" },
+          { front: "Далеко отсюда?", back: "Bu yerdan uzoqmi?" },
+          { front: "Покажите на карте", back: "Xaritada ko'rsating" },
+        ],
+        quiz: [
+          { q: "\"...qayerda?\" ruscha?", opts: ["Сколько?", "Где находится?", "Как зовут?", "Когда?"], ans: 1 },
+          { q: "\"Поверните направо\" nima?", opts: ["Chapga", "O'ngga buriling", "To'g'riga", "Orqaga"], ans: 1 },
+          { q: "\"Avtobus bekati\" ruscha?", opts: ["Метро", "Вокзал", "Остановка автобуса", "Аэропорт"], ans: 2 },
+          { q: "\"Идите прямо\" nima?", opts: ["O'ngga", "To'g'riga yuring", "Uzoq", "Orqaga"], ans: 1 },
+        ],
+        talk: [
+          { text: "Извините, где метро?", hint: "Kechirasiz, metro qayerda?" },
+          { text: "Идите прямо.", hint: "To'g'riga yuring." },
+          { text: "Потом направо.", hint: "Keyin o'ngga." },
+          { text: "Это далеко?", hint: "Bu uzoqmi?" },
+        ]
+      },
+      {
+        id: "a2-3", title: "Vaqt", titleRu: "Время", icon: "📅",
+        cards: [
+          { front: "Который час?", back: "Soat nechchi?" },
+          { front: "Сегодня", back: "Bugun" }, { front: "Вчера", back: "Kecha" },
+          { front: "Завтра", back: "Ertaga" },
+          { front: "На следующей неделе", back: "Keyingi haftada" },
+          { front: "В прошлом году", back: "O'tgan yili" },
+        ],
+        quiz: [
+          { q: "\"Soat nechchi?\" ruscha?", opts: ["Какой день?", "Который час?", "Сколько?", "Дата?"], ans: 1 },
+          { q: "\"Завтра\" qachon?", opts: ["Kecha", "Bugun", "Ertaga", "Keyingi hafta"], ans: 2 },
+          { q: "\"Kecha\" ruscha?", opts: ["Сегодня", "Завтра", "Вчера", "Потом"], ans: 2 },
+          { q: "\"На следующей неделе\" nima?", opts: ["O'tgan", "Keyingi haftada", "Bugun", "Har kuni"], ans: 1 },
+        ],
+        talk: [
+          { text: "Который час?", hint: "Soat nechchi?" },
+          { text: "Сейчас три часа.", hint: "Hozir soat uch." },
+          { text: "Завтра я дома.", hint: "Ertaga men uydaman." },
+          { text: "Вчера было хорошо.", hint: "Kecha yaxshi edi." },
+        ]
+      },
+    ]
+  },
+  {
+    stage: "B1", color: C.purple,
+    lessons: [
+      {
+        id: "b1-1", title: "Fikr bildirish", titleRu: "Мнение", icon: "💬",
+        cards: [
+          { front: "Я думаю, что...", back: "Men o'ylayman..." },
+          { front: "По-моему...", back: "Mening fikrimcha..." },
+          { front: "Я согласен", back: "Men roziman" },
+          { front: "Я не согласен", back: "Men rozi emasman" },
+          { front: "С одной стороны...", back: "Bir tomondan..." },
+          { front: "С другой стороны...", back: "Boshqa tomondan..." },
+        ],
+        quiz: [
+          { q: "\"Men roziman\" ruscha?", opts: ["Я не знаю", "Я согласен", "Я думаю", "Мне всё равно"], ans: 1 },
+          { q: "\"По-моему\" nima?", opts: ["Albatta", "Mening fikrimcha", "Masalan", "Shuning uchun"], ans: 1 },
+          { q: "Rozi bo'lmaslik?", opts: ["Я согласен", "Я думаю", "Я не согласен", "Может быть"], ans: 2 },
+          { q: "\"С одной стороны\" nima?", opts: ["Bir tomondan", "Birinchi", "Xulosa", "Masalan"], ans: 0 },
+        ],
+        talk: [
+          { text: "Я думаю, что это хорошо.", hint: "Bu yaxshi deb o'ylayman." },
+          { text: "По-моему, нужно подумать.", hint: "Fikrimcha, o'ylash kerak." },
+          { text: "Я согласен с вами.", hint: "Men siz bilan roziman." },
+          { text: "С другой стороны, это сложно.", hint: "Boshqa tomondan, bu qiyin." },
+        ]
+      },
+      {
+        id: "b1-2", title: "Ishda", titleRu: "На работе", icon: "💼",
+        cards: [
+          { front: "Собеседование", back: "Suhbat (ish)" },
+          { front: "Зарплата", back: "Maosh" }, { front: "Опыт работы", back: "Ish tajribasi" },
+          { front: "Резюме", back: "Rezyume" }, { front: "Коллега", back: "Hamkasb" },
+          { front: "Начальник", back: "Boshliq" },
+        ],
+        quiz: [
+          { q: "\"Maosh\" ruscha?", opts: ["Работа", "Зарплата", "Опыт", "Офис"], ans: 1 },
+          { q: "\"Собеседование\" nima?", opts: ["Tajriba", "Hamkasb", "Suhbat", "Maosh"], ans: 2 },
+          { q: "\"Boshliq\" ruscha?", opts: ["Коллега", "Начальник", "Директор", "Менеджер"], ans: 1 },
+          { q: "\"Резюме\" nima?", opts: ["Xat", "Ariza", "Rezyume", "Shartnoma"], ans: 2 },
+        ],
+        talk: [
+          { text: "У меня собеседование.", hint: "Mening suhbatim bor." },
+          { text: "Какая зарплата?", hint: "Maosh qancha?" },
+          { text: "У меня три года опыта.", hint: "Menda uch yil tajriba." },
+          { text: "Мой начальник строгий.", hint: "Boshliqim qattiq." },
+        ]
+      },
+    ]
+  },
+  {
+    stage: "B2", color: C.orange,
+    lessons: [
+      {
+        id: "b2-1", title: "Idiomalar", titleRu: "Идиомы", icon: "🧠",
+        cards: [
+          { front: "Как рыба в воде", back: "O'zini qulay his qilmoq" },
+          { front: "Вешать лапшу на уши", back: "Aldamoq" },
+          { front: "Убить двух зайцев", back: "Bir tosh — ikki qush" },
+          { front: "Не в своей тарелке", back: "Noqulay his qilmoq" },
+          { front: "Водить за нос", back: "Aldamoq, laqillatmoq" },
+          { front: "Ни рыба ни мясо", back: "Na u na bu" },
+        ],
+        quiz: [
+          { q: "\"Убить двух зайцев\" nima?", opts: ["Quyon ovlamoq", "Bir tosh — ikki qush", "Tez yugurmoq", "Ikki marta"], ans: 1 },
+          { q: "\"Вешать лапшу\" ma'nosi?", opts: ["Oshpazlik", "Aldamoq", "Tinglash", "O'rganish"], ans: 1 },
+          { q: "Noqulay his qilish?", opts: ["Как рыба в воде", "Убить двух зайцев", "Не в своей тарелке", "Водить за нос"], ans: 2 },
+          { q: "\"Как рыба в воде\" qachon?", opts: ["Suzganda", "Qulay his qilganda", "Baliq yeganda", "Suv ichganda"], ans: 1 },
+        ],
+        talk: [
+          { text: "Он как рыба в воде.", hint: "U o'zini juda qulay his qilyapti." },
+          { text: "Не вешай лапшу на уши!", hint: "Yolg'on gapirma!" },
+          { text: "Я убил двух зайцев.", hint: "Ikki qushni bir tosh bilan urdim." },
+          { text: "Я не в своей тарелке.", hint: "O'zimni noqulay his qilyapman." },
+        ]
+      },
+      {
+        id: "b2-2", title: "Bahs", titleRu: "Дискуссия", icon: "🎯",
+        cards: [
+          { front: "Дело в том, что...", back: "Gap shundaki..." },
+          { front: "Нельзя не согласиться", back: "Rozi bo'lmaslik mumkin emas" },
+          { front: "Подводя итог...", back: "Xulosa qilib..." },
+          { front: "Несмотря на то, что...", back: "...ga qaramasdan..." },
+          { front: "Более того...", back: "Bundan tashqari..." },
+          { front: "Тем не менее...", back: "Shunga qaramay..." },
+        ],
+        quiz: [
+          { q: "\"Xulosa qilib\" ruscha?", opts: ["Дело в том", "Подводя итог", "Более того", "Тем не менее"], ans: 1 },
+          { q: "\"Несмотря на\" nima?", opts: ["Shuning uchun", "Chunki", "Qaramasdan", "Tashqari"], ans: 2 },
+          { q: "\"Более того\" ma'nosi?", opts: ["Kamroq", "Bundan tashqari", "Qaramay", "Xulosa"], ans: 1 },
+          { q: "\"Тем не менее\" qachon?", opts: ["Rozi bo'lganda", "Sabab", "Ziddiyat", "Savol"], ans: 2 },
+        ],
+        talk: [
+          { text: "Дело в том, что я не согласен.", hint: "Gap shundaki, men rozi emasman." },
+          { text: "Несмотря на трудности.", hint: "Qiyinchiliklarga qaramasdan." },
+          { text: "Подводя итог.", hint: "Xulosa qilib aytganda." },
+          { text: "Тем не менее, это важно.", hint: "Shunga qaramay, bu muhim." },
+        ]
+      },
+    ]
+  }
+];
+
+// Storage via localStorage
+const storage = {
+  get(key) { try { return JSON.parse(localStorage.getItem(key) || "{}"); } catch { return {}; } },
+  set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+};
+
+function norm(s) { return s.toLowerCase().replace(/ё/g, "е").replace(/[^а-яa-z0-9\s]/g, "").replace(/\s+/g, " ").trim(); }
+
+function wordScore(original, typed) {
+  const ow = norm(original).split(" ").filter(Boolean);
+  const tw = norm(typed).split(" ").filter(Boolean);
+  if (!ow.length) return { pct: 0, words: [] };
+  const words = ow.map(w => ({ word: w, ok: tw.includes(w) }));
+  return { pct: Math.round((words.filter(w => w.ok).length / ow.length) * 100), words };
+}
+
+function speak(text, onEnd) {
+  if (!window.speechSynthesis) { if (onEnd) onEnd(); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "ru-RU"; u.rate = 0.82; u.pitch = 1;
+  const v = window.speechSynthesis.getVoices().find(v => v.lang && v.lang.startsWith("ru"));
+  if (v) u.voice = v;
+  if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
+  window.speechSynthesis.speak(u);
+}
+
+function Dots({ total, current, color }) {
+  return <div style={{ display: "flex", gap: 3, marginBottom: 20 }}>
+    {Array.from({ length: total }, (_, i) => <div key={i} style={{ flex: 1, height: 5, borderRadius: 3, background: i <= current ? color : C.border, transition: "all .3s" }} />)}
+  </div>;
+}
+
+function Btn({ children, onClick, color = C.green, outline, disabled, full }) {
+  return <button onClick={onClick} disabled={disabled} style={{
+    padding: "14px 28px", fontSize: 15, fontWeight: 700, fontFamily: FONT, letterSpacing: LS,
+    border: outline ? `2px solid ${color}` : "none", borderRadius: 14,
+    cursor: disabled ? "not-allowed" : "pointer",
+    background: disabled ? C.muted : outline ? "transparent" : color,
+    color: outline ? color : "#fff", width: full ? "100%" : "auto",
+    borderBottom: disabled || outline ? "none" : `4px solid ${color}cc`,
+    opacity: disabled ? 0.5 : 1, transition: "all .15s",
+  }}>{children}</button>;
+}
+
+function FlashCard({ card, flipped, onFlip }) {
+  return <div onClick={onFlip} style={{ perspective: 800, cursor: "pointer", width: "100%", maxWidth: 400, height: 210, margin: "0 auto" }}>
+    <div style={{ position: "relative", width: "100%", height: "100%", transition: "transform .5s", transformStyle: "preserve-3d", transform: flipped ? "rotateY(180deg)" : "none" }}>
+      <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", background: C.card, border: `2px solid ${C.border}`, borderRadius: 16, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ fontSize: 11, color: C.sub, marginBottom: 8, letterSpacing: 2, textTransform: "uppercase" }}>Ruscha</div>
+        <div style={{ fontSize: 24, fontWeight: 700, color: C.text, letterSpacing: LS, textAlign: "center" }}>{card.front}</div>
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 16 }}>bosing ↻</div>
+      </div>
+      <div style={{ position: "absolute", inset: 0, backfaceVisibility: "hidden", transform: "rotateY(180deg)", background: C.greenBg, border: `2px solid ${C.green}40`, borderRadius: 16, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ fontSize: 11, color: C.greenDark, marginBottom: 8, letterSpacing: 2, textTransform: "uppercase" }}>O'zbekcha</div>
+        <div style={{ fontSize: 24, fontWeight: 700, color: C.greenDark, letterSpacing: LS, textAlign: "center" }}>{card.back}</div>
+      </div>
+    </div>
+  </div>;
+}
+
+function CardMode({ lesson, color, onDone }) {
+  const [ci, setCi] = useState(0);
+  const [fl, setFl] = useState(false);
+  const t = lesson.cards.length;
+  return <div style={{ padding: "16px 0" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+      <span style={{ fontSize: 12, color: C.sub, letterSpacing: LS }}>{ci + 1}/{t}</span>
+      <span style={{ fontSize: 12, color, fontWeight: 700, letterSpacing: LS }}>📇 Kartochkalar</span>
+    </div>
+    <Dots total={t} current={ci} color={color} />
+    <FlashCard card={lesson.cards[ci]} flipped={fl} onFlip={() => setFl(!fl)} />
+    <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 24 }}>
+      <Btn onClick={() => { if (ci > 0) { setFl(false); setTimeout(() => setCi(ci - 1), 80); } }} outline color={C.sub} disabled={ci === 0}>←</Btn>
+      <Btn onClick={() => { if (ci < t - 1) { setFl(false); setTimeout(() => setCi(ci + 1), 80); } else onDone(); }} color={color}>{ci < t - 1 ? "→" : "Test →"}</Btn>
+    </div>
+  </div>;
+}
+
+function QuizView({ lesson, color, onComplete }) {
+  const [qi, setQi] = useState(0); const [sel, setSel] = useState(null);
+  const [ok, setOk] = useState(0); const [done, setDone] = useState(false); const [ans, setAns] = useState(false);
+  const q = lesson.quiz[qi]; const tot = lesson.quiz.length; const isOk = sel === q?.ans;
+  const pick = i => { if (ans) return; setSel(i); setAns(true); if (i === q.ans) setOk(c => c + 1); };
+  const nxt = () => { if (qi < tot - 1) { setQi(qi + 1); setSel(null); setAns(false); } else setDone(true); };
+  if (done) { const p = Math.round((ok / tot) * 100); const pass = p >= 75; return <div style={{ textAlign: "center", padding: "36px 20px" }}>
+    <div style={{ fontSize: 56, marginBottom: 14 }}>{pass ? "🎉" : "📚"}</div>
+    <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: LS, color: pass ? C.green : C.orange }}>{p}%</div>
+    <div style={{ fontSize: 14, color: C.sub, marginBottom: 28 }}>{ok}/{tot} to'g'ri</div>
+    <Btn onClick={() => onComplete(pass)} color={pass ? C.green : C.orange}>{pass ? "Davom →" : "Qayta"}</Btn>
+  </div>; }
+  return <div style={{ padding: "16px 0" }}>
+    <Dots total={tot} current={qi} color={color} />
+    <div style={{ fontSize: 12, color: C.sub, letterSpacing: LS, marginBottom: 6 }}>{qi + 1}/{tot}</div>
+    <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: LS, color: C.text, marginBottom: 24, lineHeight: 1.4 }}>{q.q}</div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 24 }}>
+      {q.opts.map((o, i) => {
+        let bg = C.card, bd = C.border, tc = C.text;
+        if (ans) { if (i === q.ans) { bg = C.greenBg; bd = C.green; tc = C.greenDark; } else if (i === sel && !isOk) { bg = C.redBg; bd = C.red; tc = C.red; } }
+        return <button key={i} onClick={() => pick(i)} style={{ padding: "14px 18px", background: bg, border: `2px solid ${bd}`, borderRadius: 14, textAlign: "left", cursor: ans ? "default" : "pointer", fontSize: 15, fontWeight: 600, fontFamily: FONT, letterSpacing: LS, color: tc }}>{o}</button>;
+      })}
+    </div>
+    {ans && <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+      <div style={{ fontSize: 14, fontWeight: 700, color: isOk ? C.green : C.red }}>{isOk ? "✓ To'g'ri!" : `✗ ${q.opts[q.ans]}`}</div>
+      <Btn onClick={nxt} color={color} full>{qi < tot - 1 ? "Keyingi →" : "Natija"}</Btn>
+    </div>}
+  </div>;
+}
+
+function TalkMode({ lesson, color, onDone }) {
+  const [ti, setTi] = useState(0);
+  const [step, setStep] = useState("read");
+  const [typed, setTyped] = useState("");
+  const [result, setResult] = useState(null);
+  const [playing, setPlaying] = useState(false);
+  const [scores, setScores] = useState([]);
+  const [lc, setLc] = useState(0);
+  const inputRef = useRef(null);
+  const phrase = lesson.talk[ti]; const total = lesson.talk.length;
+
+  const handleListen = () => { setPlaying(true); setLc(c => c + 1); speak(phrase.text, () => setPlaying(false)); };
+  const handleCheck = () => { const r = wordScore(phrase.text, typed); setResult(r); setScores(p => [...p, r.pct]); setStep("result"); };
+  const handleNext = () => { if (ti < total - 1) { setTi(ti + 1); setStep("read"); setTyped(""); setResult(null); setLc(0); } else onDone(scores); };
+  const handleRetry = () => { setStep("read"); setTyped(""); setResult(null); setLc(0); };
+  const goWrite = () => { setStep("write"); setTimeout(() => { if (inputRef.current) inputRef.current.focus(); }, 100); };
+
+  const sColor = result ? (result.pct >= 80 ? C.green : result.pct >= 50 ? C.orange : C.red) : C.green;
+  const sBg = result ? (result.pct >= 80 ? C.greenBg : result.pct >= 50 ? C.orangeBg : C.redBg) : C.greenBg;
+
+  return <div style={{ padding: "16px 0" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+      <span style={{ fontSize: 12, color: C.sub, letterSpacing: LS }}>{ti + 1}/{total}</span>
+      <span style={{ fontSize: 12, color, fontWeight: 700, letterSpacing: LS }}>🗣️ Suhbat</span>
+    </div>
+    <Dots total={total} current={ti} color={color} />
+    <div style={{ display: "flex", gap: 4, marginBottom: 24, justifyContent: "center" }}>
+      {[{ id: "read", l: "O'qi", ic: "📖" }, { id: "listen", l: "Tingla", ic: "🔊" }, { id: "write", l: "Yoz", ic: "✍️" }, { id: "result", l: "Natija", ic: "✓" }].map((s, i) => {
+        const a = s.id === step; const p = ["read", "listen", "write", "result"].indexOf(step) > i;
+        return <div key={s.id} style={{ padding: "5px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700, letterSpacing: LS, background: a ? `${color}15` : p ? C.greenBg : "transparent", color: a ? color : p ? C.greenDark : C.muted, border: `1px solid ${a ? color + "30" : "transparent"}` }}>{s.ic} {s.l}</div>;
+      })}
+    </div>
+    <div style={{ background: C.card, border: `2px solid ${C.border}`, borderRadius: 16, padding: 28, textAlign: "center" }}>
+      {step === "read" && <>
+        <div style={{ fontSize: 11, color: C.sub, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>O'qing va yodlang</div>
+        <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: LS, color: C.text, marginBottom: 10, lineHeight: 1.4 }}>{phrase.text}</div>
+        <div style={{ fontSize: 14, color: C.sub, letterSpacing: LS, marginBottom: 24 }}>{phrase.hint}</div>
+        <Btn onClick={() => setStep("listen")} color={color}>Tayyor, tinglash →</Btn>
+      </>}
+      {step === "listen" && <>
+        <div style={{ fontSize: 11, color: C.sub, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Tinglang va takrorlang</div>
+        <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: LS, color: C.text, marginBottom: 10, lineHeight: 1.4 }}>{phrase.text}</div>
+        <div style={{ fontSize: 14, color: C.sub, letterSpacing: LS, marginBottom: 24 }}>{phrase.hint}</div>
+        <button onClick={handleListen} disabled={playing} style={{ width: 80, height: 80, borderRadius: "50%", background: playing ? `${color}20` : color, border: "none", cursor: playing ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 32, margin: "0 auto 12px", borderBottom: playing ? "none" : `4px solid ${color}cc`, animation: playing ? "pulse 1.2s infinite" : "none" }}>{playing ? "🔊" : "▶️"}</button>
+        <div style={{ fontSize: 12, color: C.sub, marginBottom: 20 }}>{playing ? "Tinglayapsiz..." : lc === 0 ? "Bosing va tinglang" : `${lc} marta eshitdingiz`}</div>
+        <Btn onClick={goWrite} color={color}>Yozishga o'tish ✍️</Btn>
+      </>}
+      {step === "write" && <>
+        <div style={{ fontSize: 11, color: C.sub, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Eshitganingizni yozing</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+          <button onClick={handleListen} disabled={playing} style={{ width: 52, height: 52, borderRadius: "50%", background: playing ? `${color}20` : `${color}12`, border: `2px solid ${color}30`, cursor: playing ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, animation: playing ? "pulse 1.2s infinite" : "none" }}>{playing ? "🔊" : "▶️"}</button>
+        </div>
+        <div style={{ fontSize: 13, color: C.sub, marginBottom: 12 }}>{phrase.hint}</div>
+        <textarea ref={inputRef} value={typed} onChange={e => setTyped(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && typed.trim()) { e.preventDefault(); handleCheck(); } }} placeholder="Ruscha yozing..." style={{ width: "100%", minHeight: 80, padding: 16, fontSize: 18, fontWeight: 600, fontFamily: FONT, letterSpacing: LS, color: C.text, border: `2px solid ${C.border}`, borderRadius: 14, background: C.bg, resize: "none", textAlign: "center", lineHeight: 1.5 }} />
+        <div style={{ marginTop: 16 }}><Btn onClick={handleCheck} color={color} disabled={!typed.trim()} full>Tekshirish ✓</Btn></div>
+      </>}
+      {step === "result" && result && <>
+        <div style={{ fontSize: 11, color: C.sub, letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>Natija</div>
+        <div style={{ display: "inline-block", padding: "8px 24px", borderRadius: 14, background: sBg, marginBottom: 16 }}>
+          <span style={{ fontSize: 32, fontWeight: 800, color: sColor, letterSpacing: LS }}>{result.pct}%</span>
+        </div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: sColor, marginBottom: 16, letterSpacing: LS }}>
+          {result.pct >= 80 ? "Ajoyib! 🎉" : result.pct >= 50 ? "Yaxshi, mashq qiling 💪" : "Takrorlang 📖"}
+        </div>
+        <div style={{ background: C.bg, borderRadius: 12, padding: 16, marginBottom: 8 }}>
+          <div style={{ fontSize: 11, color: C.sub, marginBottom: 8, letterSpacing: 1, textTransform: "uppercase" }}>To'g'ri javob:</div>
+          <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: LS, lineHeight: 1.8 }}>
+            {result.words.map((w, i) => <span key={i} style={{ color: w.ok ? C.greenDark : C.red, background: w.ok ? C.greenBg : C.redBg, padding: "2px 6px", borderRadius: 6, marginRight: 4, display: "inline-block", marginBottom: 4 }}>{w.word}</span>)}
+          </div>
+        </div>
+        <div style={{ background: C.bg, borderRadius: 12, padding: 16, marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: C.sub, marginBottom: 8, letterSpacing: 1, textTransform: "uppercase" }}>Siz yozdingiz:</div>
+          <div style={{ fontSize: 16, color: C.text, letterSpacing: LS, fontWeight: 500 }}>{typed}</div>
+        </div>
+        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+          <Btn onClick={handleRetry} color={C.sub} outline>↻ Qayta</Btn>
+          <Btn onClick={handleNext} color={color}>{ti < total - 1 ? "Keyingi →" : "Yakunlash"}</Btn>
+        </div>
+      </>}
+    </div>
+  </div>;
+}
+
+function TalkResult({ scores, onDone, color }) {
+  const avg = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
+  const pass = avg >= 60;
+  return <div style={{ textAlign: "center", padding: "36px 20px" }}>
+    <div style={{ fontSize: 56, marginBottom: 14 }}>{pass ? "🎉" : "📝"}</div>
+    <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: LS, color: pass ? C.green : C.orange }}>{avg}%</div>
+    <div style={{ fontSize: 14, color: C.sub, marginBottom: 28 }}>O'rtacha natija</div>
+    <Btn onClick={() => onDone(pass)} color={pass ? C.green : C.orange}>{pass ? "Davom →" : "Qayta"}</Btn>
+  </div>;
+}
+
+function LessonView({ lesson, color, onBack, onComplete, completed }) {
+  const [mode, setMode] = useState(null);
+  const [ts, setTs] = useState(null);
+  const back = <button onClick={() => { setMode(null); setTs(null); }} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: C.sub, fontFamily: FONT, letterSpacing: LS, padding: "8px 0", marginBottom: 4 }}>← Orqaga</button>;
+  if (mode === "cards") return <div>{back}<CardMode lesson={lesson} color={color} onDone={() => setMode("quiz")} /></div>;
+  if (mode === "quiz") return <div>{back}<QuizView lesson={lesson} color={color} onComplete={ok => { if (ok) setMode("talk"); else setMode(null); }} /></div>;
+  if (mode === "talk" && ts) return <div>{back}<TalkResult scores={ts} color={color} onDone={ok => { if (ok) onComplete(lesson.id); setTs(null); setMode(null); }} /></div>;
+  if (mode === "talk") return <div>{back}<TalkMode lesson={lesson} color={color} onDone={s => setTs(s)} /></div>;
+  return <div>
+    <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 600, color: C.sub, fontFamily: FONT, letterSpacing: LS, padding: "8px 0", marginBottom: 4 }}>← Orqaga</button>
+    <div style={{ textAlign: "center", padding: "16px 0 24px" }}>
+      <div style={{ fontSize: 48, marginBottom: 8 }}>{lesson.icon}</div>
+      <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: LS, color: C.text }}>{lesson.title}</div>
+      <div style={{ fontSize: 14, color: C.sub, letterSpacing: LS }}>{lesson.titleRu}</div>
+      {completed && <div style={{ display: "inline-block", marginTop: 8, padding: "4px 12px", background: C.greenBg, borderRadius: 14, fontSize: 12, fontWeight: 700, color: C.greenDark }}>✓ Tugatildi</div>}
+    </div>
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      {[
+        { icon: "📇", t: "Kartochkalar", d: `${lesson.cards.length} ta so'z`, m: "cards" },
+        { icon: "✏️", t: "Test", d: `${lesson.quiz.length} ta savol`, m: "quiz" },
+        { icon: "🗣️", t: "Suhbat", d: "Tingla → Yoz → Tekshir", m: "talk" },
+      ].map(item => (
+        <button key={item.m} onClick={() => setMode(item.m)} style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 20px", background: C.card, border: `2px solid ${C.border}`, borderBottom: `4px solid ${C.border}`, borderRadius: 14, cursor: "pointer", fontFamily: FONT, textAlign: "left", width: "100%" }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${color}12`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{item.icon}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text, letterSpacing: LS }}>{item.t}</div>
+            <div style={{ fontSize: 12, color: C.sub, letterSpacing: LS, marginTop: 1 }}>{item.d}</div>
+          </div>
+          <div style={{ fontSize: 16, color: C.muted }}>→</div>
+        </button>
+      ))}
+    </div>
+  </div>;
+}
+
+function App() {
+  const [progress, setProgress] = useState({});
+  const [cur, setCur] = useState(null);
+  useEffect(() => { setProgress(storage.get("rus-learn")); if (window.speechSynthesis) { window.speechSynthesis.getVoices(); setTimeout(() => window.speechSynthesis.getVoices(), 500); } }, []);
+  const complete = useCallback(id => { setProgress(prev => { const n = { ...prev, [id]: true }; storage.set("rus-learn", n); return n; }); setCur(null); }, []);
+  const all = LESSONS.flatMap(s => s.lessons.map(l => ({ ...l, color: s.color, stage: s.stage })));
+  const doneN = all.filter(l => progress[l.id]).length; const totalN = all.length;
+  const active = cur ? all.find(l => l.id === cur) : null;
+  return <div style={{ minHeight: "100vh", background: C.bg, fontFamily: FONT }}>
+    <div style={{ background: C.card, borderBottom: `1px solid ${C.border}`, padding: "16px 20px", position: "sticky", top: 0, zIndex: 10 }}>
+      <div style={{ maxWidth: 460, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div><div style={{ fontSize: 18, fontWeight: 800, letterSpacing: LS, color: C.text }}>Rus tili</div><div style={{ fontSize: 11, color: C.sub, letterSpacing: LS }}>A1+ → B2</div></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, background: C.greenBg, borderRadius: 16, padding: "5px 12px" }}><span style={{ fontSize: 13 }}>⚡</span><span style={{ fontSize: 13, fontWeight: 700, color: C.greenDark, letterSpacing: LS }}>{doneN}/{totalN}</span></div>
+      </div>
+    </div>
+    <div style={{ maxWidth: 460, margin: "0 auto", padding: "20px 16px 50px" }}>
+      {active ? <LessonView lesson={active} color={active.color} completed={progress[active.id]} onBack={() => setCur(null)} onComplete={complete} /> : <>
+        <div style={{ background: C.card, border: `2px solid ${C.border}`, borderRadius: 16, padding: 24, textAlign: "center", marginBottom: 24 }}>
+          <div style={{ fontSize: 11, color: C.sub, letterSpacing: 2, textTransform: "uppercase" }}>Daraja</div>
+          <div style={{ fontSize: 38, fontWeight: 800, letterSpacing: LS, color: C.green, marginTop: 4 }}>A1+</div>
+          <div style={{ fontSize: 13, color: C.sub, letterSpacing: LS, marginTop: 2 }}>Maqsad: <strong style={{ color: C.orange }}>B2</strong></div>
+          <div style={{ marginTop: 16, background: C.border, borderRadius: 8, height: 10, overflow: "hidden" }}>
+            <div style={{ height: "100%", borderRadius: 8, width: `${Math.round((doneN / totalN) * 100)}%`, background: `linear-gradient(90deg, ${C.green}, ${C.blue}, ${C.purple}, ${C.orange})`, transition: "width .5s" }} />
+          </div>
+          <div style={{ fontSize: 11, color: C.sub, marginTop: 6, letterSpacing: LS }}>{Math.round((doneN / totalN) * 100)}%</div>
+        </div>
+        {LESSONS.map((stage, si) => {
+          const prev = LESSONS.slice(0, si).flatMap(s => s.lessons);
+          const unlocked = si === 0 || prev.every(l => progress[l.id]);
+          return <div key={stage.stage} style={{ marginBottom: 32 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+              <div style={{ padding: "4px 12px", borderRadius: 8, background: `${stage.color}12`, fontSize: 13, fontWeight: 800, color: stage.color, letterSpacing: LS }}>{stage.stage}</div>
+              <div style={{ flex: 1, height: 1, background: C.border }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap" }}>
+              {stage.lessons.map((l, li) => {
+                const pv = stage.lessons.slice(0, li);
+                const locked = !unlocked || (li > 0 && !pv.every(x => progress[x.id]));
+                const done = progress[l.id];
+                return <div key={l.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+                  <button onClick={locked ? undefined : () => setCur(l.id)} style={{
+                    width: 64, height: 64, borderRadius: "50%",
+                    background: done ? stage.color : locked ? C.border : C.card,
+                    border: done ? `3px solid ${stage.color}` : locked ? `3px solid ${C.border}` : `3px solid ${stage.color}50`,
+                    borderBottom: done ? `5px solid ${stage.color}cc` : locked ? `5px solid ${C.muted}` : `5px solid ${stage.color}70`,
+                    cursor: locked ? "not-allowed" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 24, opacity: locked ? 0.4 : 1, transition: "all .2s",
+                  }}>{done ? <span style={{ filter: "brightness(0) invert(1)", fontSize: 22 }}>✓</span> : locked ? "🔒" : l.icon}</button>
+                  <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: LS, color: locked ? C.muted : C.text }}>{l.title}</div>
+                </div>;
+              })}
+            </div>
+          </div>;
+        })}
+        <div style={{ textAlign: "center", marginTop: 16 }}>
+          <button onClick={() => { setProgress({}); storage.set("rus-learn", {}); }} style={{ background: "none", border: "none", fontSize: 12, color: C.muted, cursor: "pointer", fontFamily: FONT, letterSpacing: LS }}>Tozalash</button>
+        </div>
+      </>}
+    </div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
